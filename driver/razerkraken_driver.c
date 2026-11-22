@@ -72,6 +72,27 @@ static int razer_kraken_send_control_msg(struct hid_device *hdev,struct razer_kr
     return ret;
 }
 
+static int razer_kraken_v3_send_report(struct hid_device *hdev, const u8 *data, size_t len)
+{
+    struct usb_device *usb_dev = hid_to_usb_dev(hdev);
+    int ret;
+
+    ret = usb_control_msg_send(usb_dev,
+                               0,
+                               HID_REQ_SET_REPORT,
+                               USB_TYPE_CLASS | USB_RECIP_INTERFACE | USB_DIR_OUT,
+                               0x0240,
+                               0x0003,
+                               data,
+                               len,
+                               USB_CTRL_SET_TIMEOUT,
+                               GFP_KERNEL);
+    if (ret)
+        hid_warn(hdev, "Failed to send Kraken V3 USB control message: %d\n", ret);
+
+    return ret;
+}
+
 /**
  * Get a request report
  *
@@ -215,6 +236,10 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Kraken Ultimate";
         break;
 
+    case USB_DEVICE_ID_RAZER_KRAKEN_V3:
+        device_type = "Razer Kraken V3";
+        break;
+
     case USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2:
         device_type = "Razer Kraken Kitty V2";
         break;
@@ -282,6 +307,15 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
     struct razer_kraken_request_report report = get_kraken_request_report(0x04, 0x40, 0x01, device->led_mode_address);
     union razer_kraken_effect_byte effect_byte = get_kraken_effect_byte();
 
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3) {
+        u8 off_report[13] = {0x40, 0x01, 0x01, 0x0f, 0x00, 0x00};
+
+        mutex_lock(&device->lock);
+        razer_kraken_v3_send_report(device->hdev, off_report, sizeof(off_report));
+        mutex_unlock(&device->lock);
+        return count;
+    }
+
     // Spectrum Cycling | OFF
     effect_byte.bits.on_off_static = 0;
     effect_byte.bits.spectrum_cycling = 0;
@@ -311,6 +345,15 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
     if (count != 3 && count != 4) {
         dev_warn(dev, "razerkraken: Static mode only accepts RGB (3byte) or RGB with intensity (4byte)\n");
         return -EINVAL;
+    }
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3) {
+        u8 static_report[13] = {0x40, 0x01, 0x01, 0x0f, 0x01, 0x01, buf[0], buf[1], buf[2]};
+
+        mutex_lock(&device->lock);
+        razer_kraken_v3_send_report(device->hdev, static_report, sizeof(static_report));
+        mutex_unlock(&device->lock);
+        return count;
     }
 
     rgb_report.arguments[0] = buf[0];
@@ -760,6 +803,10 @@ static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_i
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
+        case USB_DEVICE_ID_RAZER_KRAKEN_V3:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            break;
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
@@ -821,6 +868,11 @@ static void razer_kraken_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_matrix_current_effect);         // Get current effect
             break;
 
+        case USB_DEVICE_ID_RAZER_KRAKEN_V3:
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);            // No effect
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);          // Static effect
+            break;
+
         case USB_DEVICE_ID_RAZER_KRAKEN:
         case USB_DEVICE_ID_RAZER_KRAKEN_V2:
         case USB_DEVICE_ID_RAZER_KRAKEN_TE:
@@ -847,7 +899,7 @@ static int razer_raw_event(struct hid_device *hdev, struct hid_report *report, u
 
     //dev_warn(dev, "razerkraken: Got raw message %d\n", size);
 
-    if(size == 33) { // Should be a response to a Control packet
+    if(size == 33 || (device->usb_pid == USB_DEVICE_ID_RAZER_KRAKEN_V3 && size == 23)) { // Should be a response to a Control packet
         memcpy(device->data, data, size);
 
     } else {
@@ -867,6 +919,7 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V2) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_TE) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_V3) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2) },
     { 0 }
 };
