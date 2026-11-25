@@ -36,7 +36,6 @@ The following applications complement and interact with this driver:
 
 * [Polychromatic](https://github.com/polychromatic/polychromatic) - a graphical management tool and tray applet to managing Razer peripherals.
 * [RazerGenie](https://github.com/z3ntu/RazerGenie) - Qt application for configuring your Razer devices under GNU/Linux.
-* [razerCommander](https://github.com/GabMus/razerCommander) - Simple GUI written in Gtk3
 * [Snake](http://bithatch.co.uk/snake.html) - a stylised tool and tray applet for configuring Razer devices on Linux, written in Java.
 * [Chroma Feedback](https://github.com/redaxmedia/chroma-feedback) - Turn your Razer keyboard, mouse or headphone into a extreme feedback device
 
@@ -170,9 +169,15 @@ This will output something similar to this:
 | Razer Blade 14 (2025)                                         |  1532:02C5  |
 | Razer Blade 16 (2025)                                         |  1532:02C6  |
 | Razer Blade 18 (2025)                                         |  1532:02C7  |
+| Razer Joro                                                    |  1532:02CD  |
 | Razer Huntsman V3 Pro 8KHz                                    |  1532:02CF  |
+| Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wireless) |  1532:02D2  |
+| Razer BlackWidow V4 Low-profile Tenkeyless HyperSpeed (Wired) |  1532:02D4  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wireless)          |  1532:02D5  |
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)             |  1532:02D7  |
+| Razer Blade 16 (2026)                                         |  1532:02E0  |
+| Razer Blade 18 (2026)                                         |  1532:02E1  |
+| Razer Huntsman V3 HE Magnetic Tenkeyless 8KHz                 |  1532:02EA  |
 | Razer BlackWidow V3 Tenkeyless                                |  1532:0A24  |
 
 ### Mice
@@ -214,6 +219,7 @@ This will output something similar to this:
 | Razer Abyssus V2                                              |  1532:005B  |
 | Razer DeathAdder Elite                                        |  1532:005C  |
 | Razer Abyssus 2000                                            |  1532:005E  |
+| Razer DeathAdder 2000                                         |  1532:005F  |
 | Razer Lancehead Tournament Edition                            |  1532:0060  |
 | Razer Atheris (Receiver)                                      |  1532:0062  |
 | Razer Basilisk                                                |  1532:0064  |
@@ -291,6 +297,13 @@ This will output something similar to this:
 | Razer Basilisk Mobile (Receiver)                              |  1532:00D4  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wired)       |  1532:00D6  |
 | Razer Basilisk V3 Pro 35K Phantom Green Edition (Wireless)    |  1532:00D7  |
+| Razer Cobra HyperSpeed (Wired)                                |  1532:00DA  |
+| Razer Cobra HyperSpeed (Wireless)                             |  1532:00DB  |
+| Razer Viper V3 Pro SE (Wired)                                 |  1532:00DE  |
+| Razer Viper V3 Pro SE (Wireless)                              |  1532:00DF  |
+| Razer Orochi V2 2026 (Receiver)                               |  1532:00E0  |
+| Razer Viper V4 Pro (Wired)                                    |  1532:00E5  |
+| Razer Viper V4 Pro (Wireless)                                 |  1532:00E6  |
 
 ### Mousemats
 | Device                                                        | USB VID:PID |
@@ -345,6 +358,7 @@ This will output something similar to this:
 | Razer Base Station V2 Chroma                                  |  1532:0F20  |
 | Razer Thunderbolt 4 Dock Chroma                               |  1532:0F21  |
 | Razer Charging Pad Chroma                                     |  1532:0F26  |
+| Razer Raptor 27 (165Hz)                                       |  1532:0F28  |
 | Razer Laptop Stand Chroma V2                                  |  1532:0F2B  |
 
 ---

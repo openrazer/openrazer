@@ -732,9 +732,15 @@ static void razer_kraken_init(struct razer_kraken_device *dev, struct usb_interf
 static int razer_kraken_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
-    struct usb_interface *intf = to_usb_interface(hdev->dev.parent);
-    struct usb_device *usb_dev = interface_to_usbdev(intf);
+    struct usb_interface *intf;
+    struct usb_device *usb_dev;
     struct razer_kraken_device *dev = NULL;
+
+    if (!hid_is_usb(hdev))
+        return -ENODEV;
+
+    intf = to_usb_interface(hdev->dev.parent);
+    usb_dev = interface_to_usbdev(intf);
 
     dev = kzalloc_obj(*dev);
     if(dev == NULL) {

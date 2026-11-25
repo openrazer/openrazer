@@ -40,6 +40,12 @@
 #define REL_HWHEEL_HI_RES 0x0c
 #endif
 
+/* hid_is_usb() was added in Linux 5.16, and to some stable kernels before.
+ * See also https://git.kernel.org/torvalds/c/f83baa0 */
+#if LINUX_VERSION_CODE < KERNEL_VERSION(5, 16, 0)
+#define hid_is_usb(hdev) ((hdev)->ll_driver == &usb_hid_driver)
+#endif
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(5, 10, 0)
 __printf(2, 3)
 int sysfs_emit(char *buf, const char *fmt, ...);

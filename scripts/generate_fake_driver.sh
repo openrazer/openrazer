@@ -44,7 +44,8 @@ declare -A files_metadata=(
     ["fully_charged_matrix_effect_static"]="w;"
     ["fully_charged_matrix_effect_wave"]="w;"
     ["game_led_state"]="rw;0"
-    ["hyperpolling_wireless_dongle_indicator_led_mode"]="w;"
+    ["hyperpolling_wireless_dongle_indicator_led_mode"]="rw;1"
+    ["hyperpolling_wireless_dongle_multi_indicator_led_modes"]="rw;0x010101"
     ["hyperpolling_wireless_dongle_pair"]="w;"
     ["hyperpolling_wireless_dongle_unpair"]="w;"
     ["keyswitch_optimization"]="rw;0"
@@ -201,7 +202,8 @@ while IFS= read -r device_raw; do
         [ "$device_pid" = "028F" ] || # Razer Ornata V3
         [ "$device_pid" = "02A2" ] || # Razer Ornata V3 X
         [ "$device_pid" = "00C2" ] || # Razer DeathAdder V3 Pro (Wired)
-        [ "$device_pid" = "00C3" ]; then # Razer DeathAdder V3 Pro (Wireless)
+        [ "$device_pid" = "00C3" ] || # Razer DeathAdder V3 Pro (Wireless)
+        [ "$device_pid" = "005F" ]; then # Razer DeathAdder 2000
         filename=${filename%.cfg}_2.cfg
     fi
 
