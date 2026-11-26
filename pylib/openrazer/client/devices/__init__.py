@@ -245,7 +245,7 @@ class RazerDevice(object):
             self._dbus_interfaces['profile_led'] = _dbus.Interface(self._dbus, "razer.device.lighting.profile_led")
         if self.has('scroll_mode') or self.has('scroll_acceleration') or self.has('scroll_smart_reel'):
             self._dbus_interfaces['scroll'] = _dbus.Interface(self._dbus, "razer.device.scroll")
-        if self.has('onboard_buttons') or self.has('onboard_macros'):
+        if self.has('side_plate') or self.has('onboard_buttons') or self.has('onboard_macros'):
             self._dbus_interfaces['onboard'] = _dbus.Interface(self._dbus, "razer.device.onboard")
 
     def _get_available_features(self) -> dict[str, list[str]]:
