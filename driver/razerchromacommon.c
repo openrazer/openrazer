@@ -1637,6 +1637,112 @@ struct razer_report razer_chroma_misc_get_scroll_smart_reel(void)
 }
 
 /**
+ * Set the active HyperScroll profile (Naga V2 Pro)
+ *
+ * The argument is a 1-based position in the profile cycle list, not a profile ID.
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    02       15    00  0102    | SET SCROLL PROFILE (VARSTR, POSITION 2)
+ */
+struct razer_report razer_chroma_misc_set_scroll_profile_position(unsigned char position)
+{
+    struct razer_report report = get_razer_report(0x15, 0x00, 0x02);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = position;
+
+    return report;
+}
+
+/**
+ * Set the HyperScroll profile cycle list and the active position in it (Naga V2 Pro)
+ *
+ * The device does not validate the IDs, so callers must pass unique IDs from 1 to 6.
+ *
+ * Status Trans Packet Proto DataSize Class CMD Args
+ * 00     1f    0000   00    09       15    07  010204818384850000    | POSITION 2, PROFILES 1 3 4 5
+ */
+struct razer_report razer_chroma_misc_set_scroll_profile_list(unsigned char position, const unsigned char *ids, unsigned char count)
+{
+    struct razer_report report = get_razer_report(0x15, 0x07, 0x09);
+    unsigned char i;
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = position;
+    report.arguments[2] = count;
+
+    for (i = 0; i < count && i < 6; i++)
+        report.arguments[3 + i] = 0x80 | ids[i];
+
+    return report;
+}
+
+/**
+ * Get the HyperScroll profile cycle list (Naga V2 Pro)
+ */
+struct razer_report razer_chroma_misc_get_scroll_profile_list(void)
+{
+    struct razer_report report = get_razer_report(0x15, 0x87, 0x09);
+
+    report.arguments[0] = VARSTORE;
+
+    return report;
+}
+
+/**
+ * Set the header of a HyperScroll curve profile (Naga V2 Pro)
+ *
+ * up_peak and down_peak are little-endian float32: the x of each curve's strongest point.
+ * The header only takes effect once every point it announces has been written.
+ */
+struct razer_report razer_chroma_misc_set_scroll_curve_header(unsigned char profile, const unsigned char *up_peak, const unsigned char *down_peak,
+        unsigned short up_points, unsigned short down_points, unsigned short speed_points)
+{
+    struct razer_report report = get_razer_report(0x15, 0x03, 0x50);
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = profile;
+    report.arguments[2] = 0x01;
+    report.arguments[3] = 0x01;
+    memcpy(&report.arguments[8], up_peak, 4);
+    memcpy(&report.arguments[16], down_peak, 4);
+    report.arguments[20] = (up_points >> 8) & 0xff;
+    report.arguments[21] = up_points & 0xff;
+    report.arguments[22] = (down_points >> 8) & 0xff;
+    report.arguments[23] = down_points & 0xff;
+    report.arguments[24] = (speed_points >> 8) & 0xff;
+    report.arguments[25] = speed_points & 0xff;
+
+    return report;
+}
+
+/**
+ * Set up to 8 points of a HyperScroll curve segment (Naga V2 Pro)
+ *
+ * Segment 1 is scrolling up, 2 is scrolling down, 3 is the speed multiplier.
+ * points holds count pairs of little-endian float32 (x, y).
+ */
+struct razer_report razer_chroma_misc_set_scroll_curve_points(unsigned char profile, unsigned char segment, unsigned short offset,
+        const unsigned char *points, unsigned char count)
+{
+    struct razer_report report = get_razer_report(0x15, 0x04, 0x50);
+
+    if (count > 8)
+        count = 8;
+
+    report.arguments[0] = VARSTORE;
+    report.arguments[1] = profile;
+    report.arguments[2] = segment;
+    report.arguments[3] = (offset >> 8) & 0xff;
+    report.arguments[4] = offset & 0xff;
+    report.arguments[5] = 0x00;
+    report.arguments[6] = count;
+    memcpy(&report.arguments[7], points, count * 8);
+
+    return report;
+}
+
+/**
  * Get LED mode for HyperPolling Wireless Dongle
  */
 struct razer_report razer_chroma_misc_get_hyperpolling_wireless_dongle_indicator_led_mode(void)

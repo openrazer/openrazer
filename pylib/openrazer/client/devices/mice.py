@@ -263,3 +263,83 @@ class RazerMouse(__RazerDevice):
             self._dbus_interfaces['scroll'].setScrollSmartReel(enabled)
         else:
             raise NotImplementedError()
+
+    @property
+    def scroll_profile(self) -> int:
+        """
+        Get the device's HyperScroll profile
+
+        :return: The current profile (1 = standard, 2 = distinct, 3 = precise, 4 = adaptive, 5 = smooth, 6 = custom)
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_profile'):
+            return int(self._dbus_interfaces['scroll'].getScrollProfile())
+        else:
+            raise NotImplementedError()
+
+    @scroll_profile.setter
+    def scroll_profile(self, profile: int) -> None:
+        """
+        Set the device's HyperScroll profile
+
+        :param profile: The profile to set (1 = standard, 2 = distinct, 3 = precise, 4 = adaptive, 5 = smooth, 6 = custom)
+        :type profile: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_profile'):
+            self._dbus_interfaces['scroll'].setScrollProfile(profile)
+        else:
+            raise NotImplementedError()
+
+    @property
+    def scroll_profiles_enabled(self) -> int:
+        """
+        Get which HyperScroll profiles are enabled
+
+        :return: Bitmask where bit n-1 is set if profile n is enabled
+        :rtype: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_profiles_enabled'):
+            return int(self._dbus_interfaces['scroll'].getScrollProfilesEnabled())
+        else:
+            raise NotImplementedError()
+
+    @scroll_profiles_enabled.setter
+    def scroll_profiles_enabled(self, mask: int) -> None:
+        """
+        Set which HyperScroll profiles are enabled
+
+        :param mask: Bitmask where bit n-1 enables profile n, at least one bit set
+        :type mask: int
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_profiles_enabled'):
+            self._dbus_interfaces['scroll'].setScrollProfilesEnabled(mask)
+        else:
+            raise NotImplementedError()
+
+    def set_scroll_custom_profile(self, up: list[tuple[float, float]], down: list[tuple[float, float]], speed: list[tuple[float, float]]) -> None:
+        """
+        Set the detent curves of the custom HyperScroll profile (6)
+
+        :param up: (degrees, strength) points for scrolling up, from x = 0 to the notch width (3.75 to 45); strength 0 to 0.2
+        :type up: list of (float, float)
+
+        :param down: (degrees, strength) points for scrolling down, ending at the same x as up
+        :type down: list of (float, float)
+
+        :param speed: (signed wheel speed, multiplier) points; a multiplier of 1 leaves the strength unchanged
+        :type speed: list of (float, float)
+
+        :raises NotImplementedError: If function is not supported
+        """
+        if self.has('scroll_custom_profile'):
+            self._dbus_interfaces['scroll'].setScrollCustomProfile(up, down, speed)
+        else:
+            raise NotImplementedError()
