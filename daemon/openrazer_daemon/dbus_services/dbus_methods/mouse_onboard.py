@@ -129,8 +129,8 @@ def add_onboard_macro(self, macro_id, events):
 
     if macro_id not in range(1, 0x10000):
         raise ValueError("macro_id has to be between 1 and 65535")
-    if len(events) not in range(1, 4095):
-        raise ValueError("events have to be between 1 and 4094 bytes")
+    if len(events) not in range(1, 4094):
+        raise ValueError("events have to be between 1 and 4093 bytes")
 
     driver_path = self.get_driver_path('macro')
 

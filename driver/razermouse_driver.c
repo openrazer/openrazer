@@ -6231,7 +6231,8 @@ static ssize_t razer_attr_write_macro(struct device *dev, struct device_attribut
     unsigned int size, offset, len;
     int err;
 
-    if (count < 3)
+    // The firmware creates a larger macro but then fails its last chunk
+    if (count < 3 || count - 2 > 4093)
         return -EINVAL;
 
     macro_id = ((unsigned char)buf[0] << 8) | (unsigned char)buf[1];
