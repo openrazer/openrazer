@@ -40,6 +40,7 @@ class RazerDevice(DBusService):
     POLL_RATES: Optional[list[int]] = None
     DPI_MAX: Optional[int] = None
     DRIVER_MODE = False
+    ONBOARD_BUTTONS: tuple[int, ...] = ()
 
     WAVE_DIRS = (1, 2)
 

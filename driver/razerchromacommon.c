@@ -1733,3 +1733,151 @@ struct razer_report razer_chroma_misc_set_hyperpolling_wireless_dongle_multi_ind
 
     return report;
 }
+
+/**
+ * Get the side plate id (Naga V2 Pro)
+ *
+ * 0x00 none, 0x01 2-button, 0x03 12-button, 0x04 6-button
+ */
+struct razer_report razer_chroma_misc_get_side_plate(void)
+{
+    return get_razer_report(0x00, 0xB9, 0x01);
+}
+
+/**
+ * Set the action of a button
+ *
+ * Storage is the profile: VARSTORE (0x01) or an onboard profile (0x02-0x05). Layer 0x00 is
+ * standard, 0x01 Hypershift. Action is <type> <length> <data...>, at most 7 bytes.
+ */
+struct razer_report razer_chroma_misc_set_button_action(unsigned char variable_storage, unsigned char button, unsigned char layer, const unsigned char *action, unsigned char action_len)
+{
+    struct razer_report report = get_razer_report(0x02, 0x0C, 0x0A);
+
+    report.arguments[0] = variable_storage;
+    report.arguments[1] = button;
+    report.arguments[2] = layer;
+    action_len = min_t(unsigned char, action_len, 7);
+    memcpy(&report.arguments[3], action, action_len);
+
+    return report;
+}
+
+/**
+ * Get the action of a button
+ *
+ * The reply's byte for the layer is not an echo of the request: it reads 0x01 on both layers
+ * for a button bound as the Hypershift key, and 0x00 otherwise.
+ */
+struct razer_report razer_chroma_misc_get_button_action(unsigned char variable_storage, unsigned char button, unsigned char layer)
+{
+    struct razer_report report = get_razer_report(0x02, 0x8C, 0x0A);
+
+    report.arguments[0] = variable_storage;
+    report.arguments[1] = button;
+    report.arguments[2] = layer;
+
+    return report;
+}
+
+/**
+ * Get the number of macros stored on the device
+ */
+struct razer_report razer_chroma_misc_get_macro_count(void)
+{
+    return get_razer_report(0x06, 0x80, 0x02);
+}
+
+/**
+ * Get up to count macro ids, beginning at list index start
+ *
+ * The reply is <u16 start> <u16 total> <u16 id>... After a delete the firmware can list zero ids
+ * in place of live ones; the count (0x80) and per-id lengths (0x88) stay correct.
+ */
+struct razer_report razer_chroma_misc_get_macro_list(unsigned short start, unsigned char count)
+{
+    struct razer_report report;
+
+    count = min_t(unsigned char, count, 38);
+    report = get_razer_report(0x06, 0x8B, 4 + 2 * count);
+    report.arguments[0] = (start >> 8) & 0xFF;
+    report.arguments[1] = start & 0xFF;
+
+    return report;
+}
+
+/**
+ * Get the length of a macro's event stream in bytes
+ */
+struct razer_report razer_chroma_misc_get_macro_length(unsigned short macro_id)
+{
+    struct razer_report report = get_razer_report(0x06, 0x88, 0x06);
+
+    report.arguments[0] = (macro_id >> 8) & 0xFF;
+    report.arguments[1] = macro_id & 0xFF;
+
+    return report;
+}
+
+/**
+ * Get macro storage usage
+ *
+ * The reply is <u16 max macros> <u32 total> <u32 free> <u32 deleted, not yet reclaimed>
+ */
+struct razer_report razer_chroma_misc_get_macro_storage(void)
+{
+    return get_razer_report(0x06, 0x8E, 0x0E);
+}
+
+/**
+ * Create a macro, reserving length bytes for its event stream
+ */
+struct razer_report razer_chroma_misc_create_macro(unsigned short macro_id, unsigned int length)
+{
+    struct razer_report report = get_razer_report(0x06, 0x08, 0x06);
+
+    report.arguments[0] = (macro_id >> 8) & 0xFF;
+    report.arguments[1] = macro_id & 0xFF;
+    report.arguments[2] = (length >> 24) & 0xFF;
+    report.arguments[3] = (length >> 16) & 0xFF;
+    report.arguments[4] = (length >> 8) & 0xFF;
+    report.arguments[5] = length & 0xFF;
+
+    return report;
+}
+
+/**
+ * Write part of a macro's event stream, at most 73 bytes per report
+ *
+ * Events: 0x01 <usage> key down, 0x02 <usage> key up, 0x11 <ms> and 0x12 <ms u16> delays.
+ */
+struct razer_report razer_chroma_misc_write_macro(unsigned short macro_id, unsigned int offset, const unsigned char *data, unsigned char len)
+{
+    struct razer_report report;
+
+    len = min_t(unsigned char, len, 73);
+    report = get_razer_report(0x06, 0x09, 7 + len);
+    report.arguments[0] = (macro_id >> 8) & 0xFF;
+    report.arguments[1] = macro_id & 0xFF;
+    report.arguments[2] = (offset >> 24) & 0xFF;
+    report.arguments[3] = (offset >> 16) & 0xFF;
+    report.arguments[4] = (offset >> 8) & 0xFF;
+    report.arguments[5] = offset & 0xFF;
+    report.arguments[6] = len;
+    memcpy(&report.arguments[7], data, len);
+
+    return report;
+}
+
+/**
+ * Delete a macro
+ */
+struct razer_report razer_chroma_misc_delete_macro(unsigned short macro_id)
+{
+    struct razer_report report = get_razer_report(0x06, 0x03, 0x02);
+
+    report.arguments[0] = (macro_id >> 8) & 0xFF;
+    report.arguments[1] = macro_id & 0xFF;
+
+    return report;
+}
