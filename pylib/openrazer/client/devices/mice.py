@@ -276,7 +276,7 @@ class RazerMouse(__RazerDevice):
 
         :raises NotImplementedError: If function is not supported
         """
-        if self.has('onboard_buttons'):
+        if self.has('side_plate'):
             return int(self._dbus_interfaces['onboard'].getSidePlate())
         else:
             raise NotImplementedError()

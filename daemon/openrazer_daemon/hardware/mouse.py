@@ -1196,6 +1196,8 @@ class RazerBasiliskV3(__RazerDevice):
                'get_scroll_mode', 'set_scroll_mode',
                'get_scroll_acceleration', 'set_scroll_acceleration',
                'get_scroll_smart_reel', 'set_scroll_smart_reel',
+               # Onboard buttons
+               'get_onboard_buttons', 'get_button_action', 'set_button_action',
                # All LEDs (partial support)
                'set_static_effect', 'set_wave_effect', 'set_spectrum_effect',
                # Logo (partial support)
@@ -1204,6 +1206,8 @@ class RazerBasiliskV3(__RazerDevice):
                'set_scroll_wave', 'set_scroll_static', 'set_scroll_spectrum',
                # Can set custom matrix effects
                'set_custom_effect', 'set_key_row']
+
+    ONBOARD_BUTTONS = (0x01, 0x02, 0x03, 0x04, 0x05, 0x09, 0x0a, 0x0e, 0x0f, 0x34, 0x35, 0x60, 0x6a)
 
     DEVICE_IMAGE = "https://assets2.razerzone.com/pages/basilisk-v3-4D578898E8144Le8da21dde32b7a9f5f/basilisk.png"
 

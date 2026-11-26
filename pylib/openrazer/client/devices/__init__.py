@@ -71,7 +71,8 @@ class RazerDevice(object):
             'scroll_mode': self._has_feature('razer.device.scroll', ('getScrollMode', 'setScrollMode')),
             'scroll_acceleration': self._has_feature('razer.device.scroll', ('getScrollAcceleration', 'setScrollAcceleration')),
             'scroll_smart_reel': self._has_feature('razer.device.scroll', ('getScrollSmartReel', 'setScrollSmartReel')),
-            'onboard_buttons': self._has_feature('razer.device.onboard', ('getSidePlate', 'getButtons', 'getButtonAction', 'setButtonAction')),
+            'side_plate': self._has_feature('razer.device.onboard', 'getSidePlate'),
+            'onboard_buttons': self._has_feature('razer.device.onboard', ('getButtons', 'getButtonAction', 'setButtonAction')),
             'onboard_macros': self._has_feature('razer.device.onboard', ('addMacro', 'deleteMacro', 'getMacros', 'getMacroStorage')),
 
             # Default device is a chroma so lighting capabilities
