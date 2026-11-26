@@ -2473,3 +2473,21 @@ class RazerHuntsmanV3HEMagneticTKL8KHz(_RazerDeviceBrightnessSuspend):
         """
         super()._close()
         self.key_manager.close()
+
+
+class RazerReclusaXMini65(_RippleKeyboard):
+    """
+    Class for the Razer Reclusa X Mini 65%
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Razer_Reclusa_X_Mini_65_(-if01)?-event-kbd')
+
+    USB_VID = 0x1532
+    USB_PID = 0x02E3
+    HAS_MATRIX = True
+    WAVE_DIRS = (1, 2)
+    MATRIX_DIMS = [5, 16]
+    METHODS = ['get_device_type_keyboard', 'set_wave_effect', 'set_static_effect', 'set_spectrum_effect',
+               'set_reactive_effect', 'set_none_effect', 'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_effect', 'set_key_row', 'get_game_mode', 'set_game_mode',
+               'set_starlight_random_effect', 'set_starlight_single_effect', 'set_starlight_dual_effect',
+               'set_ripple_effect', 'set_ripple_effect_random_colour']
