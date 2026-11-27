@@ -2625,6 +2625,7 @@ static bool razer_accessory_match(struct hid_device *hdev, bool ignore_special_d
 static int razer_accessory_probe(struct hid_device *hdev, const struct hid_device_id *id)
 {
     int retval = 0;
+    bool hw_started = false;
     unsigned char expected_protocol = USB_INTERFACE_PROTOCOL_MOUSE;
     struct usb_interface *intf;
     struct usb_device *usb_dev;
@@ -2645,6 +2646,22 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
 
     // Init data
     razer_accessory_init(dev, intf, hdev);
+
+    hid_set_drvdata(hdev, dev);
+    dev_set_drvdata(&hdev->dev, dev);
+
+    retval = hid_parse(hdev);
+    if (retval) {
+        hid_err(hdev, "parse failed\n");
+        goto exit_free;
+    }
+
+    retval = hid_hw_start(hdev, HID_CONNECT_DEFAULT);
+    if (retval) {
+        hid_err(hdev, "hw start failed\n");
+        goto exit_free;
+    }
+    hw_started = true;
 
     switch(usb_dev->descriptor.idProduct) {
     case USB_DEVICE_ID_RAZER_CORE:
@@ -2867,23 +2884,12 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         default:
             // Needs to be in "Driver" mode just to function
             err = razer_set_device_mode(dev, 0x03, 0x00);
-            if (err)
-                return err;
+            if (err) {
+                retval = err;
+                goto exit_free;
+            }
             break;
         }
-    }
-
-    hid_set_drvdata(hdev, dev);
-    dev_set_drvdata(&hdev->dev, dev);
-
-    if(hid_parse(hdev)) {
-        hid_err(hdev, "parse failed\n");
-        goto exit_free;
-    }
-
-    if (hid_hw_start(hdev, HID_CONNECT_DEFAULT)) {
-        hid_err(hdev, "hw start failed\n");
-        goto exit_free;
     }
 
     usb_disable_autosuspend(usb_dev);
@@ -2891,6 +2897,10 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
     return 0;
 
 exit_free:
+    if (hw_started)
+        hid_hw_stop(hdev);
+    dev_set_drvdata(&hdev->dev, NULL);
+    hid_set_drvdata(hdev, NULL);
     kfree(dev);
     return retval;
 }
