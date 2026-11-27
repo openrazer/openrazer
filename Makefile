@@ -46,15 +46,15 @@ driver_clean:
 driver_install:
 	@echo -e "\n::\033[34m Installing OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
-	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
-	@chown -v root:root $(DESTDIR)/$(MODULEDIR)/*.ko
+	cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
+	chown -v root:root $(DESTDIR)/$(MODULEDIR)/*.ko
 	depmod
 
 # Just use for packaging openrazer, not for installing manually
 driver_install_packaging:
 	@echo -e "\n::\033[34m Installing OpenRazer kernel modules\033[0m"
 	@echo "====================================================="
-	@cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
+	cp -v $(DRIVERDIR)/*.ko $(DESTDIR)/$(MODULEDIR)
 
 # Razer Daemon
 daemon_install:
@@ -71,20 +71,20 @@ ubuntu_daemon_install:
 python_library_install:
 	@echo -e "\n::\033[34m Installing OpenRazer python library\033[0m"
 	@echo "====================================================="
-	@$(MAKE) --no-print-directory -C pylib install
+	$(MAKE) --no-print-directory -C pylib install
 
 ubuntu_python_library_install:
 	@echo -e "\n::\033[34m Installing OpenRazer python library\033[0m"
 	@echo "====================================================="
-	@$(MAKE) --no-print-directory -C pylib ubuntu_install
+	$(MAKE) --no-print-directory -C pylib ubuntu_install
 
 # Legacy XDG autostart
 xdg_install:
-	@mkdir -p $(DESTDIR)/etc/xdg/autostart
-	@cp -v ./install_files/desktop/openrazer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/openrazer-daemon.desktop
+	mkdir -p $(DESTDIR)/etc/xdg/autostart
+	cp -v ./install_files/desktop/openrazer-daemon.desktop $(DESTDIR)/etc/xdg/autostart/openrazer-daemon.desktop
 
 install-systemd:
-	@$(MAKE) --no-print-directory -C daemon install-systemd
+	$(MAKE) --no-print-directory -C daemon install-systemd
 
 # Clean target
 clean: driver_clean
@@ -123,7 +123,7 @@ ubuntu_install: setup_dkms udev_install ubuntu_daemon_install ubuntu_python_libr
 	@echo "====================================================="
 
 install_i_know_what_i_am_doing: all driver_install udev_install python_library_install
-	@$(MAKE) --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
+	$(MAKE) --no-print-directory -C daemon install DESTDIR=$(DESTDIR)
 
 install: manual_install_msg ;
 
