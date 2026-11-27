@@ -202,6 +202,35 @@ class RazerKrakenUltimate(__RazerDevice):
             _dbus_chroma.set_breath_triple_effect(self, *args)
 
 
+class RazerKrakenV3Pro(__RazerDevice):
+    """
+    Class for the Razer Kraken V3 Pro (HyperSpeed dongle, PID 0x052c).
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_V3_Pro-event-if03')
+
+    USB_VID = 0x1532
+    USB_PID = 0x052C
+    METHODS = ['get_device_type_headset',
+               'set_static_effect', 'set_spectrum_effect', 'set_none_effect']
+
+    DEVICE_IMAGE = "https://assets3.razerzone.com/qJyFg5OTeAdMCtwboWHEvMexeDQ=/1500x1000/https%3A%2F%2Fmedias-p1.phoenix.razer.com%2Fsys-master-phoenix-images-container%2Fha7%2Fh93%2F9248880263198%2F211021-kraken-v3-pro-1500x1000-6.jpg"
+
+    def _suspend_device(self):
+        self.suspend_args.clear()
+        self.suspend_args['effect'] = self.zone["backlight"]["effect"]
+        self.suspend_args['args'] = self.zone["backlight"]["colors"][0:3]
+        _dbus_chroma.set_none_effect(self)
+
+    def _resume_device(self):
+        effect = self.suspend_args.get('effect', '')
+        args = self.suspend_args.get('args', [])
+
+        if effect == 'spectrum':
+            _dbus_chroma.set_spectrum_effect(self)
+        elif effect == 'static':
+            _dbus_chroma.set_static_effect(self, *args)
+
+
 class RazerKrakenKittyEdition(__RazerDeviceBrightnessSuspend):
     """
     Class for the Razer Kraken Kitty Edition
