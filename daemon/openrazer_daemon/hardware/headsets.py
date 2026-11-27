@@ -236,3 +236,19 @@ class RazerKrakenKittyV2(__RazerDevice):
                'set_custom_kraken']
 
     DEVICE_IMAGE = "https://medias-p1.phoenix.razer.com/sys-master-phoenix-images-container/hcc/h6b/9631977570334/kraken-kitty-v2-quartz-500x500.png"
+
+
+class RazerKrakenV3(__RazerDeviceBrightnessSuspend):
+    """
+    Class for the Razer Kraken V3
+    """
+    EVENT_FILE_REGEX = re.compile(r'.*Razer_Kraken_V3_0+-event-if03')
+
+    USB_VID = 0x1532
+    USB_PID = 0x0549
+    METHODS = ['get_device_type_headset',
+               'set_static_effect', 'set_spectrum_effect', 'set_none_effect',
+               'set_breath_random_effect', 'set_breath_single_effect', 'set_breath_dual_effect',
+               'set_custom_kraken', 'set_brightness', 'get_brightness']
+
+    DEVICE_IMAGE = "https://assets2.razerzone.com/images/pnx.assets/f1f130c30a430d901c1b0592236c69cd/razer-kraken-v3-ogimage-1200x630.jpg"
