@@ -5,9 +5,10 @@ Priority: optional
 Build-Depends: debhelper (>= 11),
                dh-python,
                python3,
+               python3-build,
+               python3-installer,
                python3-setuptools
-# "dh-dkms" for Ubuntu 23.04 and later. "dkms" for earlier releases
-Build-Depends-Indep: dh-dkms | dkms (<< 3.0.10)
+Build-Depends-Indep: dh-dkms
 Standards-Version: 4.6.0
 Vcs-Browser: https://github.com/openrazer/openrazer/
 Vcs-Git: https://github.com/openrazer/openrazer.git
