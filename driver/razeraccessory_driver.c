@@ -3109,6 +3109,7 @@ static int razer_accessory_probe(struct hid_device *hdev, const struct hid_devic
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
@@ -3412,6 +3413,7 @@ static void razer_accessory_disconnect(struct hid_device *hdev)
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK:
         case USB_DEVICE_ID_RAZER_MOUSE_DOCK_PRO:
         case USB_DEVICE_ID_RAZER_RAPTOR_27:
+        case USB_DEVICE_ID_RAZER_RAPTOR_27_165HZ:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA:
         case USB_DEVICE_ID_RAZER_LAPTOP_STAND_CHROMA_V2:
         case USB_DEVICE_ID_RAZER_LIANLI_O11_DYNAMIC:
