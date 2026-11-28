@@ -11,6 +11,5 @@ setup(
         "dbus-python >= 1.2.0",
         "PyGObject >= 3.20.0",
         "pyudev >= 0.16.1",
-        "setproctitle >= 1.1.8",
     ],
 )

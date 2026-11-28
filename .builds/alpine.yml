@@ -9,7 +9,6 @@ packages:
   - py3-mypy
   - py3-numpy
   - py3-pylint
-  - py3-setproctitle
   - py3-setuptools
   - py3-udev
   - sed
@@ -62,7 +61,7 @@ tasks:
       cd openrazer
 
       # Clean up background processes on exit
-      trap "pkill -f openrazer-daemon;
+      trap "pkill -f run_openrazer_daemon;
             pkill -f create_fake_dev;
             pkill -f dbus-daemon" EXIT
 

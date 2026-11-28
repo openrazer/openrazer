@@ -64,7 +64,6 @@ Depends: ${misc:Depends},
          python3-dbus,
          python3-gi,
          python3-pyudev,
-         python3-setproctitle,
          gir1.2-glib-2.0,
          libnotify-bin,
          dbus-session-bus

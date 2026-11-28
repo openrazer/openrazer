@@ -14,7 +14,6 @@ import os
 import sys
 import signal
 import time
-import setproctitle
 import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
@@ -45,8 +44,6 @@ class RazerDaemon(DBusService):
     """
 
     def __init__(self, verbose=False, log_dir=None, run_dir=None, config_file=None, persistence_file=None, test_dir=None):
-
-        setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
 
         # Expanding ~ as python doesn't do it by default, also creating dirs if needed
         try:
