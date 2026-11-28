@@ -4,7 +4,6 @@ packages:
   - dbus-x11
   - linux-lts-dev
   - py3-autopep8
-  - py3-daemonize
   - py3-dbus
   - py3-gobject3
   - py3-mypy

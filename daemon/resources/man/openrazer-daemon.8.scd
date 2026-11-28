@@ -21,15 +21,6 @@ Note, that all paths shown as defaults, eg ~/.local/share/ or ~/.config/ can be 
 *-v*, *--verbose*
 	Enable logging of DEBUG messages.
 
-*-F*, *--foreground*
-	Run the daemon in the foreground and don't fork. This also enables sending the log output to stdout (in addition to the log file).
-
-*-r*, *--respawn*
-	Stop any running daemon first (if one is running) before starting.
-
-*-s*, *--stop*
-	Gracefully stop the running daemon.
-
 *--as-root*
 	Allow the daemon to be started as root.
 

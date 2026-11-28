@@ -60,4 +60,4 @@ $terminal_cmd "$whereami/create_fake_device.py" --dest "$test_dir" $options &
 pkill -e openrazer-daemon
 
 # Start the daemon in a new terminal window.
-$terminal_cmd "$whereami/../daemon/run_openrazer_daemon.py" --verbose -F --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"
+$terminal_cmd "$whereami/../daemon/run_openrazer_daemon.py" --verbose --run-dir "$config_dir/data" --log-dir "$config_dir/logs" --test-dir "$test_dir"

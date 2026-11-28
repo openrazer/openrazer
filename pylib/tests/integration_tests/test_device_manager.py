@@ -14,8 +14,7 @@ import openrazer._fake_driver as fake_driver
 
 
 def run_daemon(daemon_dir, driver_dir):
-    # TODO console_log false
-    daemon = openrazer_daemon.daemon.RazerDaemon(verbose=True, console_log=False, test_dir=driver_dir)
+    daemon = openrazer_daemon.daemon.RazerDaemon(verbose=True, test_dir=driver_dir)
     daemon.run()
 
 
