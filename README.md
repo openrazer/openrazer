@@ -177,6 +177,7 @@ This will output something similar to this:
 | Razer BlackWidow V4 Tenkeyless HyperSpeed (Wired)             |  1532:02D7  |
 | Razer Blade 16 (2026)                                         |  1532:02E0  |
 | Razer Blade 18 (2026)                                         |  1532:02E1  |
+| Razer Reclusa X Mini 65%                                      |  1532:02E3  |
 | Razer Huntsman V3 HE Magnetic Tenkeyless 8KHz                 |  1532:02EA  |
 | Razer BlackWidow V3 Tenkeyless                                |  1532:0A24  |
 
