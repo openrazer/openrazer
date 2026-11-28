@@ -68,7 +68,6 @@ Depends: ${misc:Depends},
          python3-daemonize (>= 2.4.0),
          gir1.2-glib-2.0,
          libnotify-bin,
-         xautomation,
          dbus-session-bus
 Recommends: python3-openrazer (= ${binary:Version})
 Conflicts: razer-daemon
