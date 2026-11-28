@@ -5,7 +5,7 @@ Documentation=man:openrazer-daemon(8)
 [Service]
 Type=dbus
 BusName=org.razer
-ExecStart=##PREFIX##/bin/openrazer-daemon -F
+ExecStart=##PREFIX##/bin/openrazer-daemon
 
 [Install]
 WantedBy=default.target

@@ -14,7 +14,6 @@ import os
 import sys
 import signal
 import time
-import setproctitle
 import dbus.mainloop.glib
 import dbus.service
 from gi.repository import GLib
@@ -44,9 +43,7 @@ class RazerDaemon(DBusService):
     * disableTurnOffOnScreensaver - Pauses the run loop on the screensaver thread
     """
 
-    def __init__(self, verbose=False, log_dir=None, console_log=False, run_dir=None, config_file=None, persistence_file=None, test_dir=None):
-
-        setproctitle.setproctitle('openrazer-daemon')  # pylint: disable=no-member
+    def __init__(self, verbose=False, log_dir=None, run_dir=None, config_file=None, persistence_file=None, test_dir=None):
 
         # Expanding ~ as python doesn't do it by default, also creating dirs if needed
         try:
@@ -83,7 +80,7 @@ class RazerDaemon(DBusService):
         log_level = logging.INFO
         if verbose or self._config.getboolean('General', 'verbose_logging'):
             log_level = logging.DEBUG
-        self.logger = self._create_logger(log_dir, log_level, console_log)
+        self.logger = self._create_logger(log_dir, log_level)
 
         self._persistence_file = persistence_file
         self._persistence = configparser.ConfigParser()
@@ -153,14 +150,13 @@ class RazerDaemon(DBusService):
     def device_added(self):
         self.logger.debug("Emitted Device Added Signal")
 
-    def _create_logger(self, log_dir, log_level, want_console_log):
+    def _create_logger(self, log_dir, log_level):
         """
         Initializes a logger and returns it.
 
         :param log_dir: If not None, specifies the directory to create the
         log file in
         :param log_level: The log level of messages to print
-        :param want_console_log: True if we should print to the console
 
         :rtype:logging.Logger
         """
@@ -170,11 +166,10 @@ class RazerDaemon(DBusService):
         # Don't propagate to default logger
         logger.propagate = 0
 
-        if want_console_log:
-            console_logger = logging.StreamHandler()
-            console_logger.setLevel(log_level)
-            console_logger.setFormatter(formatter)
-            logger.addHandler(console_logger)
+        console_logger = logging.StreamHandler()
+        console_logger.setLevel(log_level)
+        console_logger.setFormatter(formatter)
+        logger.addHandler(console_logger)
 
         if log_dir is not None:
             log_file = os.path.join(log_dir, 'razer.log')

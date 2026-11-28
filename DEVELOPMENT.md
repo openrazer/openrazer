@@ -122,7 +122,7 @@ set your PYTHONPATH so you can run from sources.
 For Debian/Ubuntu install the following packages to be able to run the daemon:
 
 ```
-apt-get install -y libnotify-bin python3 python3-daemonize python3-dbus python3-gi python3-numpy python3-pyudev python3-setproctitle
+apt-get install -y libnotify-bin python3 python3-dbus python3-gi python3-numpy python3-pyudev
 ```
 
 #### RedHat/Fedora
@@ -130,7 +130,7 @@ apt-get install -y libnotify-bin python3 python3-daemonize python3-dbus python3-
 For RedHat/Fedora install the following packages to be able to run the daemon:
 
 ```
-dnf install -y libnotify python3 python3-daemonize python3-dbus python3-numpy python3-pyudev python3-setproctitle
+dnf install -y libnotify python3 python3-dbus python3-numpy python3-pyudev
 ```
 
 #### Test the daemon
@@ -140,7 +140,7 @@ Copy or have another clone of openrazer on your test system.
 Run:
 
 ```
-PYTHONPATH="pylib:daemon" python3 ./daemon/run_openrazer_daemon.py -Fv --config=$PWD/daemon/resources/razer.conf
+PYTHONPATH="pylib:daemon" python3 ./daemon/run_openrazer_daemon.py --verbose --config=$PWD/daemon/resources/razer.conf
 ```
 
 ## Contribute back your changes!
