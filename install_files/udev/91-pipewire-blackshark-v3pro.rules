@@ -1,0 +1,11 @@
+# Razer BlackShark V3 Pro — flag for PipeWire's ALSA Card Profile so it
+# applies the gaming-headset profile-set, exposing the device's two PCMs
+# as separate Game and Chat sinks (instead of one combined sink + the
+# generic pro-audio profile).
+#
+# PipeWire ships these for the regular V3 in /usr/lib/udev/rules.d/
+# 90-pipewire-alsa.rules but hasn't added the V3 Pro PIDs upstream yet.
+# Drop this in /etc/udev/rules.d/ to override.
+
+ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0576", ENV{ACP_PROFILE_SET}="usb-gaming-headset.conf"
+ATTRS{idVendor}=="1532", ATTRS{idProduct}=="0577", ENV{ACP_PROFILE_SET}="usb-gaming-headset.conf"

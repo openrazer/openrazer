@@ -1,0 +1,14 @@
+# Per-attribute sysfs files created by razerkraken (charge_level,
+# headphone_eq, sidetone, etc.) inherit root:root mode 0660 from the kernel.
+# The 99-razer.rules `GROUP:=plugdev` only sets group on the parent USB/HID
+# device, not on driver-created attribute files. Catch the bind event and
+# chgrp every file in the device directory so users in plugdev can write
+# without sudo.
+# Sleep first — the bind event fires while probe() is still mid-flight
+# creating sysfs attribute files. Files created AFTER our chgrp ran
+# (mic_eq, audio_prompts, etc. are near the end of the probe block) end up
+# with the default root:root and break userspace writes. 500ms covers the
+# whole probe path on slow hardware. We background it (&) so udev's event
+# pipeline isn't blocked.
+ACTION=="bind", SUBSYSTEM=="hid", DRIVER=="razerkraken", \
+    RUN+="/bin/sh -c '(sleep 0.5; chgrp plugdev /sys%p/* 2>/dev/null) &'"
