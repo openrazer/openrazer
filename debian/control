@@ -5,9 +5,10 @@ Priority: optional
 Build-Depends: debhelper (>= 11),
                dh-python,
                python3,
+               python3-build,
+               python3-installer,
                python3-setuptools
-# "dh-dkms" for Ubuntu 23.04 and later. "dkms" for earlier releases
-Build-Depends-Indep: dh-dkms | dkms (<< 3.0.10)
+Build-Depends-Indep: dh-dkms
 Standards-Version: 4.6.0
 Vcs-Browser: https://github.com/openrazer/openrazer/
 Vcs-Git: https://github.com/openrazer/openrazer.git
@@ -34,15 +35,6 @@ Section: kernel
 Depends: ${misc:Depends},
          dkms,
          udev
-Conflicts: razer-chroma-driver,
-           razer-kernel-modules-dkms,
-           openrazer-kernel-modules-dkms
-Provides: razer-chroma-driver,
-          razer-kernel-modules-dkms,
-          openrazer-kernel-modules-dkms
-Replaces: razer-chroma-driver,
-          razer-kernel-modules-dkms,
-          openrazer-kernel-modules-dkms
 Description: OpenRazer peripheral drivers (DKMS)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
@@ -70,9 +62,6 @@ Depends: ${misc:Depends},
          libnotify-bin,
          dbus-session-bus
 Recommends: python3-openrazer (= ${binary:Version})
-Conflicts: razer-daemon
-Provides: razer-daemon
-Replaces: razer-daemon
 Description: OpenRazer peripheral drivers (daemon)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
@@ -90,9 +79,6 @@ Depends: ${misc:Depends},
          python3-dbus,
          python3-gi,
          python3-numpy
-Conflicts: python3-razer
-Provides: python3-razer
-Replaces: python3-razer
 Description: OpenRazer peripheral drivers (Python 3)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and
@@ -104,9 +90,6 @@ Package: openrazer-doc
 Architecture: all
 Section: doc
 Depends: ${misc:Depends}
-Conflicts: razer-doc
-Provides: razer-doc
-Replaces: razer-doc
 Description: OpenRazer peripheral drivers (documentation)
  OpenRazer is a collection of GNU/Linux drivers for the Razer devices.
  Supported devices include keyboards, mice, mouse-mats, headsets and

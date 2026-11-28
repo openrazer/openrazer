@@ -4,9 +4,11 @@ packages:
   - dbus-x11
   - linux-lts-dev
   - py3-autopep8
+  - py3-build
   - py3-daemonize
   - py3-dbus
   - py3-gobject3
+  - py3-installer
   - py3-mypy
   - py3-numpy
   - py3-pylint
@@ -81,3 +83,7 @@ tasks:
 
       # Run a simple check to see if the daemon is alive
       ./scripts/ci/test-daemon.sh
+
+  - install: |
+      cd openrazer
+      make DESTDIR=/tmp/openrazer daemon_install python_library_install

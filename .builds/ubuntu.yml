@@ -1,6 +1,9 @@
 image: ubuntu/oldlts
 packages:
   - linux-headers-generic
+  - python3-build
+  - python3-installer
+  - python3-setuptools
 sources:
   - https://github.com/openrazer/openrazer
 tasks:
@@ -11,3 +14,7 @@ tasks:
       echo "ccflags-y += -Wall -Werror" >> driver/Makefile
       kerneldir=(/lib/modules/*/build)
       make KERNELDIR="${kerneldir[0]}"
+
+  - install: |
+      cd openrazer
+      make DESTDIR=/tmp/openrazer ubuntu_daemon_install ubuntu_python_library_install
