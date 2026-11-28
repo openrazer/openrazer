@@ -116,6 +116,12 @@ static int razer_get_report(struct hid_device *hdev, struct razer_report *reques
         return razer_get_usb_response(hdev, index, request, index, response, RAZER_MOUSE_WAIT_US);
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        index = 0x03;
+        return razer_get_usb_response(hdev, index, request, index, response, RAZER_NEW_MOUSE_RECEIVER_WAIT_US);
+        break;
+
     default:
         return razer_get_usb_response(hdev, index, request, index, response, RAZER_MOUSE_WAIT_US);
     }
@@ -182,6 +188,33 @@ retry:
         WARN_ONCE(1, "Unknown response status received: %d\n", response->status);
         return -EIO;
     }
+}
+
+/**
+ * Get the variable storage to read and write persistent settings with
+ *
+ * Most devices apply the settings saved in VARSTORE. Some devices apply the
+ * settings of their active onboard profile instead, so VARSTORE (profile 1)
+ * only has an effect while profile 1 is active. Use the active profile there.
+ */
+static unsigned char razer_get_variable_storage(struct razer_mouse_device *device)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_misc_get_active_profile();
+        request.transaction_id.id = 0x1f;
+
+        if (razer_send_payload(device, &request, &response) == 0 &&
+            response.arguments[0] >= 0x01 && response.arguments[0] <= 0x05)
+            return response.arguments[0];
+        break;
+    }
+
+    return VARSTORE;
 }
 
 /*
@@ -766,6 +799,14 @@ static ssize_t razer_attr_read_device_type(struct device *dev, struct device_att
         device_type = "Razer Viper V3 Pro SE (Wireless)";
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+        device_type = "Razer Basilisk V4 Pro (Wired)";
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        device_type = "Razer Basilisk V4 Pro (Wireless)";
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_V2_PRO_WIRED:
         device_type = "Razer Naga V2 Pro (Wired)";
         break;
@@ -873,6 +914,8 @@ static ssize_t razer_attr_read_firmware_version(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -1021,6 +1064,12 @@ static ssize_t razer_attr_write_matrix_effect_none(struct device *dev, struct de
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_none(razer_get_variable_storage(device), ZERO_LED);
+        request.transaction_id.id = 0x1f;
+        break;
+
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRELESS: // TODO: this is probably wrong?
     case USB_DEVICE_ID_RAZER_NAGA_PRO_WIRED: // TODO: this is probably wrong?
         request = razer_chroma_standard_matrix_effect_none();
@@ -1100,6 +1149,8 @@ static ssize_t razer_attr_write_matrix_effect_custom(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
     case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -1213,6 +1264,12 @@ static ssize_t razer_attr_write_matrix_effect_static(struct device *dev, struct 
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_static(razer_get_variable_storage(device), ZERO_LED, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x1f;
+        break;
+
     default:
         dev_warn(dev, "razermouse: matrix_effect_static not supported for this model\n");
         return -EINVAL;
@@ -1261,6 +1318,12 @@ static ssize_t razer_attr_write_matrix_effect_wave(struct device *dev, struct de
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, ZERO_LED, direction);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_wave(razer_get_variable_storage(device), ZERO_LED, direction);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1318,6 +1381,12 @@ static ssize_t razer_attr_write_matrix_effect_spectrum(struct device *dev, struc
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, ZERO_LED);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_spectrum(razer_get_variable_storage(device), ZERO_LED);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -1539,6 +1608,8 @@ static ssize_t razer_attr_read_device_serial(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -1685,6 +1756,8 @@ static ssize_t razer_attr_read_charge_level(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -1798,6 +1871,8 @@ static ssize_t razer_attr_read_charge_status(struct device *dev, struct device_a
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -2045,6 +2120,8 @@ static ssize_t razer_attr_read_poll_rate(struct device *dev, struct device_attri
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
         request = razer_chroma_misc_get_polling_rate2();
         request.transaction_id.id = 0x1f;
 
@@ -2266,6 +2343,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x00);
         request.transaction_id.id = 0x1f;
         break;
@@ -2341,6 +2420,8 @@ static ssize_t razer_attr_write_poll_rate(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
         request = razer_chroma_misc_set_polling_rate2(polling_rate, 0x01);
         request.transaction_id.id = 0x1F;
         err = razer_send_payload(device, &request, &response);
@@ -2509,6 +2590,57 @@ static ssize_t razer_attr_read_matrix_brightness(struct device *dev, struct devi
  *
  * Sets the mouse DPI to the unsigned short integer written to this file.
  */
+/**
+ * Set the DPI by changing the value of the active DPI stage
+ *
+ * Some devices ignore the plain DPI command and only use the DPI stages of
+ * their active onboard profile, so update the active stage in place.
+ */
+static int razer_set_active_stage_dpi(struct razer_mouse_device *device, unsigned short dpi_x, unsigned short dpi_y)
+{
+    struct razer_report request = {0};
+    struct razer_report response = {0};
+    unsigned short dpi[2 * RAZER_MOUSE_MAX_DPI_STAGES] = {0};
+    unsigned char variable_storage = razer_get_variable_storage(device);
+    unsigned char stages_count;
+    unsigned char active_stage;
+    unsigned char *args;
+    unsigned int i;
+    int err;
+
+    request = razer_chroma_misc_get_dpi_stages(variable_storage);
+    request.transaction_id.id = 0x1f;
+
+    err = razer_send_payload(device, &request, &response);
+    if (err)
+        return err;
+
+    active_stage = response.arguments[1];
+    stages_count = min_t(unsigned char, response.arguments[2], RAZER_MOUSE_MAX_DPI_STAGES);
+
+    if (active_stage < 1 || active_stage > stages_count)
+        return -EINVAL;
+
+    // Each stage is 7 bytes: stage number, DPI X, DPI Y, 2 reserved bytes
+    args = response.arguments + 4;
+    for (i = 0; i < stages_count; i++) {
+        if (args + 4 > response.arguments + response.data_size)
+            return -EINVAL;
+
+        dpi[i * 2]     = (args[0] << 8) | args[1];
+        dpi[i * 2 + 1] = (args[2] << 8) | args[3];
+        args += 7;
+    }
+
+    dpi[(active_stage - 1) * 2]     = dpi_x;
+    dpi[(active_stage - 1) * 2 + 1] = dpi_y;
+
+    request = razer_chroma_misc_set_dpi_stages(variable_storage, stages_count, active_stage, dpi);
+    request.transaction_id.id = 0x1f;
+
+    return razer_send_payload(device, &request, &response);
+}
+
 static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
     struct razer_mouse_device *device = dev_get_drvdata(dev);
@@ -2523,6 +2655,21 @@ static ssize_t razer_attr_write_dpi(struct device *dev, struct device_attribute 
 
     // So far I think imperator uses varstore
     switch(device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        if (count != 2 && count != 4) {
+            dev_warn(dev, "razermouse: DPI requires 2 bytes or 4 bytes\n");
+            return -EINVAL;
+        }
+
+        dpi_x = (buf[0] << 8) | (buf[1] & 0xFF);
+        dpi_y = (count == 4) ? ((buf[2] << 8) | (buf[3] & 0xFF)) : dpi_x;
+
+        err = razer_set_active_stage_dpi(device, dpi_x, dpi_y);
+        if (err)
+            return err;
+        return count;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G:
     case USB_DEVICE_ID_RAZER_DEATHADDER_3_5G_BLACK:
         if(count == 2) {
@@ -2851,6 +2998,8 @@ static ssize_t razer_attr_read_dpi(struct device *dev, struct device_attribute *
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -2964,10 +3113,24 @@ static ssize_t razer_attr_write_scroll_mode(struct device *dev, struct device_at
     unsigned int scroll_mode;
     int err;
 
-    if (kstrtouint(buf, 0, &scroll_mode) < 0 || scroll_mode > 1)
+    if (kstrtouint(buf, 0, &scroll_mode) < 0)
         return -EINVAL;
 
-    request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        // 0 = tactile (24 notches), 1 = free spin, 2 = tactile (48 notches)
+        if (scroll_mode > 2)
+            return -EINVAL;
+        request = razer_chroma_misc_set_scroll_mode2(scroll_mode);
+        break;
+
+    default:
+        if (scroll_mode > 1)
+            return -EINVAL;
+        request = razer_chroma_misc_set_scroll_mode(scroll_mode);
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -2989,7 +3152,16 @@ static ssize_t razer_attr_read_scroll_mode(struct device *dev, struct device_att
     struct razer_report response = {0};
     int err;
 
-    request = razer_chroma_misc_get_scroll_mode();
+    switch (device->usb_pid) {
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_misc_get_scroll_mode2();
+        break;
+
+    default:
+        request = razer_chroma_misc_get_scroll_mode();
+        break;
+    }
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3016,6 +3188,7 @@ static ssize_t razer_attr_write_scroll_acceleration(struct device *dev, struct d
         return -EINVAL;
 
     request = razer_chroma_misc_set_scroll_acceleration(acceleration);
+    request.arguments[0] = razer_get_variable_storage(device);
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3038,6 +3211,7 @@ static ssize_t razer_attr_read_scroll_acceleration(struct device *dev, struct de
     int err;
 
     request = razer_chroma_misc_get_scroll_acceleration();
+    request.arguments[0] = razer_get_variable_storage(device);
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3064,6 +3238,7 @@ static ssize_t razer_attr_write_scroll_smart_reel(struct device *dev, struct dev
         return -EINVAL;
 
     request = razer_chroma_misc_set_scroll_smart_reel(smart_reel);
+    request.arguments[0] = razer_get_variable_storage(device);
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3086,6 +3261,7 @@ static ssize_t razer_attr_read_scroll_smart_reel(struct device *dev, struct devi
     int err;
 
     request = razer_chroma_misc_get_scroll_smart_reel();
+    request.arguments[0] = razer_get_variable_storage(device);
     request.transaction_id.id = 0x1f;
 
     err = razer_send_payload(device, &request, &response);
@@ -3269,6 +3445,12 @@ static ssize_t razer_attr_write_dpi_stages(struct device *dev, struct device_att
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request.arguments[0] = razer_get_variable_storage(device);
+        request.transaction_id.id = 0x1f;
+        break;
+
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_TE_WIRED:
@@ -3388,6 +3570,12 @@ static ssize_t razer_attr_read_dpi_stages(struct device *dev, struct device_attr
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request.arguments[0] = razer_get_variable_storage(device);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -3513,6 +3701,8 @@ static ssize_t razer_attr_read_device_idle_time(struct device *dev, struct devic
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -3624,6 +3814,8 @@ static ssize_t razer_attr_write_device_idle_time(struct device *dev, struct devi
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -3714,6 +3906,8 @@ static ssize_t razer_attr_read_charge_low_threshold(struct device *dev, struct d
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -3823,6 +4017,8 @@ static ssize_t razer_attr_write_charge_low_threshold(struct device *dev, struct 
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -3977,6 +4173,8 @@ static ssize_t razer_attr_write_matrix_custom_frame(struct device *dev, struct d
         case USB_DEVICE_ID_RAZER_BASILISK_V3_35K:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_WIRELESS:
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
         case USB_DEVICE_ID_RAZER_DEATHADDER_V2_LITE:
@@ -4104,6 +4302,8 @@ static ssize_t razer_attr_write_device_mode(struct device *dev, struct device_at
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -4281,6 +4481,8 @@ static ssize_t razer_attr_read_device_mode(struct device *dev, struct device_att
     case USB_DEVICE_ID_RAZER_DEATHADDER_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V4_PRO_WIRELESS:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRED:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS:
     case USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED:
@@ -4405,6 +4607,12 @@ static ssize_t razer_attr_read_led_brightness(struct device *dev, struct device_
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_get_brightness(razer_get_variable_storage(device), led_id);
+        request.transaction_id.id = 0x1f;
+        break;
+
     case USB_DEVICE_ID_RAZER_DEATHADDER_ELITE:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRED:
     case USB_DEVICE_ID_RAZER_LANCEHEAD_WIRELESS:
@@ -4515,6 +4723,12 @@ static ssize_t razer_attr_write_led_brightness(struct device *dev, struct device
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_brightness(VARSTORE, led_id, brightness);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_brightness(razer_get_variable_storage(device), led_id, brightness);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -4640,12 +4854,23 @@ static ssize_t razer_attr_write_right_led_brightness(struct device *dev, struct 
     return razer_attr_write_led_brightness(dev, attr, buf, count, RIGHT_SIDE_LED);
 }
 
+static unsigned char razer_backlight_led_id(struct device *dev)
+{
+    struct razer_mouse_device *device = dev_get_drvdata(dev);
+
+    if (device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED ||
+        device->usb_pid == USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS)
+        return UNDERGLOW_LED;
+
+    return BACKLIGHT_LED;
+}
+
 /**
  * Read device file "backlight_led_brightness"
  */
 static ssize_t razer_attr_read_backlight_led_brightness(struct device *dev, struct device_attribute *attr, char *buf)
 {
-    return razer_attr_read_led_brightness(dev, attr, buf, BACKLIGHT_LED);
+    return razer_attr_read_led_brightness(dev, attr, buf, razer_backlight_led_id(dev));
 }
 
 /**
@@ -4653,7 +4878,7 @@ static ssize_t razer_attr_read_backlight_led_brightness(struct device *dev, stru
  */
 static ssize_t razer_attr_write_backlight_led_brightness(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_led_brightness(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_led_brightness(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -4708,6 +4933,12 @@ static ssize_t razer_attr_write_matrix_effect_wave_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_effect_wave(VARSTORE, led_id, direction);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_wave(razer_get_variable_storage(device), led_id, direction);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -4830,6 +5061,12 @@ static ssize_t razer_attr_write_matrix_effect_spectrum_common(struct device *dev
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_effect_spectrum(VARSTORE, led_id);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_spectrum(razer_get_variable_storage(device), led_id);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -5307,6 +5544,12 @@ static ssize_t razer_attr_write_matrix_effect_static_common(struct device *dev, 
         request.transaction_id.id = 0x1f;
         break;
 
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_static(razer_get_variable_storage(device), led_id, (struct razer_rgb*)&buf[0]);
+        request.transaction_id.id = 0x1f;
+        break;
+
     case USB_DEVICE_ID_RAZER_MAMBA_WIRELESS:
     case USB_DEVICE_ID_RAZER_MAMBA_WIRED:
     case USB_DEVICE_ID_RAZER_MAMBA_TE_WIRED:
@@ -5524,6 +5767,12 @@ static ssize_t razer_attr_write_matrix_effect_none_common(struct device *dev, st
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRED:
     case USB_DEVICE_ID_RAZER_PRO_CLICK_V2_WIRELESS:
         request = razer_chroma_extended_matrix_effect_none(VARSTORE, led_id);
+        request.transaction_id.id = 0x1f;
+        break;
+
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+    case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+        request = razer_chroma_extended_matrix_effect_none(razer_get_variable_storage(device), led_id);
         request.transaction_id.id = 0x1f;
         break;
 
@@ -5823,7 +6072,7 @@ static ssize_t razer_attr_write_right_matrix_effect_none(struct device *dev, str
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_wave(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_wave_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_wave_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -5833,7 +6082,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_wave(struct device *dev,
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_spectrum(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_spectrum_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -5863,7 +6112,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_breath(struct device *de
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_static(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_static_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_static_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -5873,7 +6122,7 @@ static ssize_t razer_attr_write_backlight_matrix_effect_static(struct device *de
  */
 static ssize_t razer_attr_write_backlight_matrix_effect_none(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
 {
-    return razer_attr_write_matrix_effect_none_common(dev, attr, buf, count, BACKLIGHT_LED);
+    return razer_attr_write_matrix_effect_none_common(dev, attr, buf, count, razer_backlight_led_id(dev));
 }
 
 /**
@@ -6861,6 +7110,47 @@ static int razer_mouse_probe(struct hid_device *hdev, const struct hid_device_id
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
 
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_custom);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_custom_frame);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_level);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_status);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_charge_low_threshold);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_poll_rate);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_dpi_stages);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_mode);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_acceleration);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_smart_reel);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_led_brightness);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_wave);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_spectrum);
             CREATE_DEVICE_FILE(&hdev->dev, &dev_attr_matrix_effect_static);
@@ -8081,6 +8371,47 @@ static void razer_mouse_disconnect(struct hid_device *hdev)
             device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
             break;
 
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED:
+        case USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS:
+            device_remove_file(&hdev->dev, &dev_attr_poll_rate);
+            device_remove_file(&hdev->dev, &dev_attr_dpi);
+            device_remove_file(&hdev->dev, &dev_attr_dpi_stages);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_mode);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_acceleration);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_smart_reel);
+
+            device_remove_file(&hdev->dev, &dev_attr_logo_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_logo_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_scroll_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_scroll_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_backlight_led_brightness);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_backlight_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_wave);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_spectrum);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_static);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_none);
+
+            device_remove_file(&hdev->dev, &dev_attr_matrix_effect_custom);
+            device_remove_file(&hdev->dev, &dev_attr_matrix_custom_frame);
+
+            device_remove_file(&hdev->dev, &dev_attr_charge_level);
+            device_remove_file(&hdev->dev, &dev_attr_charge_status);
+            device_remove_file(&hdev->dev, &dev_attr_charge_low_threshold);
+            device_remove_file(&hdev->dev, &dev_attr_device_idle_time);
+            break;
+
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRED:
         case USB_DEVICE_ID_RAZER_BASILISK_V3_PRO_35K_PHANTOM_GREEN_EDITION_WIRELESS:
             device_remove_file(&hdev->dev, &dev_attr_poll_rate);
@@ -9056,6 +9387,8 @@ static const struct hid_device_id razer_devices[] = {
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRED) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_VIPER_V3_PRO_SE_WIRELESS) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRED) },
+    { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_BASILISK_V4_PRO_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_NAGA_EPIC) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRELESS) },
     { HID_USB_DEVICE(USB_VENDOR_ID_RAZER,USB_DEVICE_ID_RAZER_PRO_CLICK_V2_VERTICAL_EDITION_WIRED) },

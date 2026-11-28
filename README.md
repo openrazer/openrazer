@@ -302,6 +302,8 @@ This will output something similar to this:
 | Razer Viper V3 Pro SE (Wired)                                 |  1532:00DE  |
 | Razer Viper V3 Pro SE (Wireless)                              |  1532:00DF  |
 | Razer Orochi V2 2026 (Receiver)                               |  1532:00E0  |
+| Razer Basilisk V4 Pro (Wired)                                 |  1532:00E2  |
+| Razer Basilisk V4 Pro (Wireless)                              |  1532:00E3  |
 | Razer Viper V4 Pro (Wired)                                    |  1532:00E5  |
 | Razer Viper V4 Pro (Wireless)                                 |  1532:00E6  |
 
