@@ -12,6 +12,7 @@
 #define USB_DEVICE_ID_RAZER_KRAKEN_V2 0x0510 // Codename Kylie
 #define USB_DEVICE_ID_RAZER_KRAKEN_TE 0x0520
 #define USB_DEVICE_ID_RAZER_KRAKEN_ULTIMATE 0x0527
+#define USB_DEVICE_ID_RAZER_KRAKEN_V3_HYPERSENSE 0x0533
 #define USB_DEVICE_ID_RAZER_KRAKEN_KITTY_V2 0x0560
 
 #define USB_INTERFACE_PROTOCOL_NONE 0
@@ -37,6 +38,7 @@ struct razer_kraken_device {
 
     u8 data[33];
 
+    unsigned char brightness;
 };
 
 union razer_kraken_effect_byte {
@@ -155,5 +157,33 @@ struct razer_kraken_response_report {
     unsigned char report_id;
     unsigned char arguments[36];
 };
+
+/*
+ * The Kraken V3 HyperSense sets its lighting with output report 0x40 instead of
+ * the memory addresses above, and can't read it back. Reports are zero padded:
+ *   40 01 01 00 EE NN RGB...  Set effect EE using NN colours
+ *   40 01 00 00 08            Enter direct mode
+ *   40 02 00 00 LL            Set brightness to LL
+ *   40 03 00 RR GG BB         Set the colour in direct mode
+ */
+#define KRAKEN_V3_REPORT_ID 0x40
+#define KRAKEN_V3_REPORT_DELAY_MS 15
+
+#define KRAKEN_V3_CMD_SET_MODE 0x01
+#define KRAKEN_V3_CMD_SET_BRIGHTNESS 0x02
+#define KRAKEN_V3_CMD_SET_COLOUR 0x03
+
+#define KRAKEN_V3_EFFECT_NONE 0x00
+#define KRAKEN_V3_EFFECT_STATIC 0x01
+#define KRAKEN_V3_EFFECT_BREATHING 0x02
+#define KRAKEN_V3_EFFECT_WAVE 0x03
+#define KRAKEN_V3_EFFECT_DIRECT 0x08
+
+struct razer_kraken_v3_report {
+    unsigned char report_id;
+    unsigned char command;
+    unsigned char arguments[11];
+};
+static_assert(sizeof(struct razer_kraken_v3_report) == 13);
 
 #endif
